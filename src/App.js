@@ -10,23 +10,30 @@ import { getPlacesData } from './api';
 const App = () => {
 
   const[places,setPlaces]=useState([]);
-  const[coordinates,setCoordinates]=useState({lan:0,lng:0});
+  const[coordinates,setCoordinates]=useState({});
   const[bounds,setBounds]=useState(null);
+  const[childClick,setChildClick]=useState(null);
 
-  // useEffect(()=>{
-  //   navigator.geolocation.getCurrentPosition(({coords:{latitude,longitude}})=>{
-  //      setCoordinates({lat:latitude,lng:longitude})
-  //   })
-  // },[])
+  const[loading,setLoading]=useState(false);
+
 
   useEffect(()=>{
-    console.log(bounds,coordinates);
-    getPlacesData()
-    .then((data)=>{
-      console.log(data);
-      setPlaces(data)
+    navigator.geolocation.getCurrentPosition(({coords:{latitude,longitude}})=>{
+       setCoordinates({lat:latitude,lng:longitude})
     })
-  },[bounds,coordinates]);
+  },[])
+
+  useEffect(()=>{
+    setLoading(true)
+    if(bounds!=null&&coordinates!=null){
+      getPlacesData(bounds.sw,bounds.ne)
+      .then((data)=>{
+        setPlaces(data)
+        setLoading(false)
+      })
+    }
+   
+  },[coordinates,bounds]);
   
   return (
     <>
@@ -34,13 +41,19 @@ const App = () => {
       <Header/>
       <Grid container spacing={3} style={{width:'100'}}>
         <Grid item xs={12} md={4} >
-          <List/>
+          <List 
+          places={places}
+          childClick={childClick}
+          loading={loading}
+          />
         </Grid>
         <Grid item xs={12} md={8} >
           <Map
           setCoordinates={setCoordinates}
           setBounds={setBounds}
           coordinates={coordinates}
+          places={places}
+          setChildClick={setChildClick}
           />
         </Grid>
       </Grid>

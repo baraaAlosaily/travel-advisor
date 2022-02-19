@@ -1,43 +1,37 @@
-import React,{useState} from 'react'
+import React,{useState,useEffect,createRef} from 'react'
 import { CircularProgress,Grid,Typography,InputLabel,MenuItem,FormControl,Select } from '@material-ui/core'
 
 import useStyles from "./style";
 
 import PlaceDetails from "../PlaceDetails/PlaceDetails"
 
-const List = () => {
+const List = ({places,childClick,loading}) => {
   const classes=useStyles();
   const[type,setType]=useState('restaurants');
   const[rating,setRating]=useState('');
 
-  const place=[
-    {name:"lol"},
-    {name:"kok"},
-    {name:"pop"},
-    {name:"lol"},
-    {name:"kok"},
-    {name:"pop"},
-    {name:"lol"},
-    {name:"kok"},
-    {name:"pop"},
-    {name:"lol"},
-    {name:"kok"},
-    {name:"pop"},
-    {name:"lol"},
-    {name:"kok"},
-    {name:"pop"},
-    {name:"lol"},
-    {name:"kok"},
-    {name:"pop"},
-  ]
+  const[elRefs,setElRefs]=useState([]);
 
+  useEffect(()=>{
+    const refs=Array(places?.length).fill().map((_,i)=>
+    elRefs[i]||createRef() 
+    );
+
+    setElRefs(refs)
+  },[places])
 
   return (
     <div className={classes.container}>
       <Typography variant='h4'>
         Resturant, Hotel & Attractions around you
       </Typography>
-      <FormControl className={classes.formControl}>
+      {
+        loading?(
+          <div className={classes.loading}><CircularProgress size="5rem"/></div>
+        ):
+        (
+          <>
+        <FormControl className={classes.formControl}>
         <InputLabel>Type</InputLabel>
         <Select value={type} onChange={(e)=>setType(e.target.value)}>
           <MenuItem value="restaurants">Restauranta</MenuItem>
@@ -57,13 +51,19 @@ const List = () => {
       </FormControl>
       <Grid container spacing={3} className={classes.list}>
         {
-          place?.map((p,i)=>(
+          places?.map((p,i)=>(
             <Grid item key={i} xs={12}>
-            <PlaceDetails place={p}/>
+            <PlaceDetails
+             place={p}
+             selected={Number(childClick)==i}
+             refProp={elRefs[i]}
+            />
             </Grid>
           ))
         }
       </Grid>
+      </>
+      )}
     </div>
   )
 }
